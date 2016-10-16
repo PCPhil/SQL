@@ -1,0 +1,97 @@
+sPhilip Chung
+
+
+1.
+SELECT LAST_NAME, JOB_ID
+FROM EMPLOYEES
+WHERE JOB_ID = (SELECT JOB_ID FROM EMPLOYEES WHERE LAST_NAME = 'Davies') AND LAST_NAME != 'Davies'
+/
+
+LAST_NAME                 JOB_ID
+------------------------- ----------
+Rajs                      ST_CLERK
+Matos                     ST_CLERK
+Vargas                    ST_CLERK
+
+2.
+SELECT LAST_NAME,JOB_ID, HIRE_DATE
+FROM EMPLOYEES
+WHERE HIRE_DATE > (SELECT HIRE_DATE
+		   FROM EMPLOYEES
+		   WHERE UPPER(LAST_NAME) = 'GRANT'
+		   )
+ORDER BY HIRE_DATE DESC
+/
+LAST_NAME                 JOB_ID     HIRE_DATE
+------------------------- ---------- ---------
+Zlotkey                   SA_MAN     29-JAN-00
+Mourgos                   ST_MAN     16-NOV-99
+3.
+SELECT CITY, NVL(STATE_PROVINCE,'Unknown') "Province", POSTAL_CODE,LOCATION_ID
+FROM LOCATIONS
+WHERE COUNTRY_ID IN (SELECT COUNTRY_ID
+		    FROM COUNTRIES
+		    WHERE COUNTRY_NAME LIKE 'I%')
+ORDER BY CITY
+/
+CITY                           Province                  POSTAL_CODE  LOCATION_ID
+------------------------------ ------------------------- ------------ -----------
+Bombay                         Maharashtra               490231              2100
+Roma                           Unknown                   00989               1000
+Venice                         Unknown                   10934               1100
+4.
+SELECT LAST_NAME,JOB_ID, SALARY
+FROM EMPLOYEES
+WHERE SALARY < (SELECT AVG(SALARY)
+		FROM EMPLOYEES
+		)
+AND DEPARTMENT_ID = (SELECT DEPARTMENT_ID
+		     FROM DEPARTMENTS
+		     WHERE DEPARTMENT_NAME = 'Sales'
+		     )
+ORDER BY SALARY DESC, JOB_ID
+/
+LAST_NAME                 JOB_ID         SALARY
+------------------------- ---------- ----------
+Taylor                    SA_REP           8600
+5.
+SELECT LAST_NAME,JOB_ID,SALARY
+FROM EMPLOYEES
+WHERE DEPARTMENT_ID = (SELECT DEPARTMENT_ID
+		    FROM DEPARTMENTS
+		    WHERE DEPARTMENT_NAME = 'IT'
+		    )
+ORDER BY FIRST_NAME, LAST_NAME
+/
+LAST_NAME                 JOB_ID         SALARY
+------------------------- ---------- ----------
+Hunold                    IT_PROG          9000
+Ernst                     IT_PROG          6000
+Lorentz                   IT_PROG          4200
+6.
+SELECT LAST_NAME,SALARY
+FROM EMPLOYEES E
+WHERE SALARY < ANY (SELECT MIN(SALARY)
+		  FROM EMPLOYEES
+		  GROUP BY DEPARTMENT_ID
+		)
+/
+LAST_NAME                     SALARY
+------------------------- ----------
+Hunold                          9000
+Ernst                           6000
+Lorentz                         4200
+Mourgos                         5800
+Rajs                            3500
+Davies                          3100
+Matos                           2600
+Vargas                          2500
+Zlotkey                        10500
+Abel                           11000
+Taylor                          8600
+Grant                           7000
+Whalen                          4400
+Hartstein                      13000
+Fay                             6000
+Higgins                        12000
+Gietz                           8300

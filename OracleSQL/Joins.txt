@@ -1,0 +1,148 @@
+Philip Chung
+
+1.
+SELECT DEPARTMENT_NAME,CITY,STREET_ADDRESS, POSTAL_CODE
+FROM DEPARTMENTS
+JOIN LOCATIONS
+USING (LOCATION_ID)
+ORDER BY DEPARTMENT_NAME DESC
+/
+DEPARTMENT_NAME                CITY                           STREET_ADDRESS                           POSTAL_CODE
+------------------------------ ------------------------------ ---------------------------------------- ------------
+Shipping                       South San Francisco            2011 Interiors Blvd                      99236
+Sales                          Oxford                         Magdalen Centre, The Oxford Science Park OX9 9ZB
+Marketing                      Toronto                        147 Spadina Ave                          M5V 2L7
+IT                             Southlake                      2014 Jabberwocky Rd                      26192
+Executive                      Seattle                        2004 Charade Rd                          98199
+Contracting                    Seattle                        2004 Charade Rd                          98199
+Administration                 Seattle                        2004 Charade Rd                          98199
+Accounting                     Seattle                        2004 Charade Rd                          98199
+2.
+SELECT FIRST_NAME || '/' || LAST_NAME || '.' ||' ' ||HIRE_DATE || ' ' || SALARY ||' '|| DEPARTMENT_NAME
+FROM EMPLOYEES E
+JOIN DEPARTMENTS D
+ON D.DEPARTMENT_ID = E.DEPARTMENT_ID
+WHERE (UPPER(DEPARTMENT_NAME) LIKE 'A%' OR UPPER(DEPARTMENT_NAME) LIKE 'S%')
+ORDER BY DEPARTMENT_NAME,LAST_NAME
+/
+FIRST_NAME||'/'||LAST_NAME||'.'||''||HIRE_DATE||''||SALARY||''||DEPARTMENT_NAME
+------------------------------------------------------------------------------------------------------------------------
+William/Gietz. 07-JUN-94 8300 Accounting 
+Shelley/Higgins. 07-JUN-94 12000 Accounting
+Jennifer/Whalen. 17-SEP-87 4400 Administration
+Ellen/Abel. 11-MAY-96 11000 Sales
+Jonathon/Taylor. 24-MAR-98 8600 Sales
+Eleni/Zlotkey. 29-JAN-00 10500 Sales
+Curtis/Davies. 29-JAN-97 3100 Shipping
+Randall/Matos. 15-MAR-98 2600 Shipping
+Kevin/Mourgos. 16-NOV-99 5800 Shipping
+Trenna/Rajs. 17-OCT-95 3500 Shipping
+Peter/Vargas. 09-JUL-98 2500 Shipping
+3.
+SELECT FIRST_NAME || '/' || LAST_NAME || '.' ||' ' ||HIRE_DATE || ' ' || SALARY ||' '|| DEPARTMENT_NAME
+FROM EMPLOYEES E, DEPARTMENTS D
+WHERE D.DEPARTMENT_ID = E.DEPARTMENT_ID AND (DEPARTMENT_NAME LIKE 'A%' OR DEPARTMENT_NAME LIKE 'S%')
+ORDER BY DEPARTMENT_NAME,LAST_NAME
+/
+FIRST_NAME||'/'||LAST_NAME||'.'||''||HIRE_DATE||''||SALARY||''||DEPARTMENT_NAME
+------------------------------------------------------------------------------------------------------------------------
+William/Gietz. 07-JUN-94 8300 Accounting
+Shelley/Higgins. 07-JUN-94 12000 Accounting
+Jennifer/Whalen. 17-SEP-87 4400 Administration
+Ellen/Abel. 11-MAY-96 11000 Sales
+Jonathon/Taylor. 24-MAR-98 8600 Sales
+Eleni/Zlotkey. 29-JAN-00 10500 Sales
+Curtis/Davies. 29-JAN-97 3100 Shipping
+Randall/Matos. 15-MAR-98 2600 Shipping
+Kevin/Mourgos. 16-NOV-99 5800 Shipping
+Trenna/Rajs. 17-OCT-95 3500 Shipping
+Peter/Vargas. 09-JUL-98 2500 Shipping
+4.
+SELECT E.last_name || ', ' || E.first_name || '.',D.DEPARTMENT_NAME,L.CITY,L.POSTAL_CODE,L.STATE_PROVINCE
+FROM DEPARTMENTS D 
+JOIN EMPLOYEES E
+ON D.MANAGER_ID = E.EMPLOYEE_ID
+JOIN LOCATIONS L
+ON L.LOCATION_ID=D.LOCATION_ID
+WHERE (L.STATE_PROVINCE = 'Ontario' OR L.STATE_PROVINCE = 'California' OR L.STATE_PROVINCE = 'Washington')
+ORDER BY 3,2
+/
+E.LAST_NAME||','||E.FIRST_NAME||'.'              DEPARTMENT_NAME                CITY                           POSTAL_CODE  STATE_PROVINCE
+------------------------------------------------ ------------------------------ ------------------------------ ------------ -------------------------
+Higgins, Shelley.                                Accounting                     Seattle                        98199        Washington
+Whalen, Jennifer.                                Administration                 Seattle                        98199        Washington
+King, Steven.                                    Executive                      Seattle                        98199        Washington
+Mourgos, Kevin.                                  Shipping                       South San Francisco            99236        California
+Hartstein, Michael.                              Marketing                      Toronto                        M5V 2L7      Ontario
+5.
+SELECT E.last_name || ', ' || E.first_name || '.',D.DEPARTMENT_NAME,L.CITY,L.POSTAL_CODE,L.STATE_PROVINCE
+FROM LOCATIONS L,DEPARTMENTS D,EMPLOYEES E 
+WHERE (D.MANAGER_ID = E.EMPLOYEE_ID)
+AND (L.LOCATION_ID=D.LOCATION_ID)
+AND (L.STATE_PROVINCE = 'Ontario' OR L.STATE_PROVINCE = 'California' OR L.STATE_PROVINCE = 'Washington')
+ORDER BY 3,2
+/
+E.LAST_NAME||','||E.FIRST_NAME||'.'              DEPARTMENT_NAME                CITY                           POSTAL_CODE  STATE_PROVINCE
+------------------------------------------------ ------------------------------ ------------------------------ ------------ -------------------------
+Higgins, Shelley.                                Accounting                     Seattle                        98199        Washington
+Whalen, Jennifer.                                Administration                 Seattle                        98199        Washington
+King, Steven.                                    Executive                      Seattle                        98199        Washington
+Mourgos, Kevin.                                  Shipping                       South San Francisco            99236        California
+Hartstein, Michael.                              Marketing                      Toronto                        M5V 2L7      Ontario+
+6.
+SELECT DEPARTMENT_NAME, MAX(SALARY)"High", MIN(SALARY)"Low",AVG(SALARY)"Avg"
+FROM DEPARTMENTS D
+JOIN EMPLOYEES E
+ON D.DEPARTMENT_ID = E.DEPARTMENT_ID
+GROUP BY DEPARTMENT_NAME
+ORDER BY AVG(SALARY) DESC
+/
+DEPARTMENT_NAME                      High        Low        Avg
+------------------------------ ---------- ---------- ----------
+Executive                           24000      17000 19333.3333
+Accounting                          12000       8300      10150
+Sales                               11000       8600 10033.3333
+Marketing                           13000       6000       9500
+IT                                   9000       4200       6400
+Administration                       4400       4400       4400
+Shipping                             5800       2500       3500
+7.
+SELECT DISTINCT E.LAST_NAME"Employee",E.EMPLOYEE_ID"Emp#",M.LAST_NAME"Manager",M.MANAGER_ID"Mgr#"
+FROM EMPLOYEES E
+FULL OUTER JOIN EMPLOYEES M
+ON (E.MANAGER_ID = M.EMPLOYEE_ID)
+/
+Employee                        Emp# Manager                         Mgr#
+------------------------- ---------- ------------------------- ----------
+Davies                           142 Mourgos                          100
+Taylor                           176 Zlotkey                          100
+King                             100
+Ernst                            104 Hunold                           102
+Matos                            143 Mourgos                          100
+Rajs                             141 Mourgos                          100
+                                     Taylor                           149
+Kochhar                          101 King
+Lorentz                          107 Hunold                           102
+                                     Matos                            124
+Grant                            178 Zlotkey                          100
+                                     Grant                            149
+Gietz                            206 Higgins                          101
+Zlotkey                          149 King
+Higgins                          205 Kochhar                          100
+Whalen                           200 Kochhar                          100
+Fay                              202 Hartstein                        100
+Mourgos                          124 King
+                                     Ernst                            103
+                                     Lorentz                          103
+                                     Davies                           124
+                                     Vargas                           124
+                                     Rajs                             124
+                                     Fay                              201
+Hartstein                        201 King
+De Haan                          102 King
+Vargas                           144 Mourgos                          100
+Abel                             174 Zlotkey                          100
+                                     Whalen                           101
+                                     Gietz                            205
+Hunold                           103 De Haan                          100
+                                     Abel                             149

@@ -1,0 +1,69 @@
+Philip Chung
+
+CREATE TABLE client(
+client_id NUMBER(5)CONSTRAINT client_pk PRIMARY KEY,
+client_name VARCHAR2(20),
+client_address VARCHAR2(30),
+client_city VARCHAR(10) CONSTRAINT nl_client_city NOT NULL,
+client_prov CHAR(2) CONSTRAINT nl_prov_prov NOT NULL,
+client_postal CHAR(6) CONSTRAINT nl_client_postal NOT NULL
+);
+SQL> desc client
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ CLIENT_ID                                 NOT NULL NUMBER(5)
+ CLIENT_NAME                                        VARCHAR2(20)
+ CLIENT_ADDRESS                                     VARCHAR2(30)
+ CLIENT_CITY                               NOT NULL VARCHAR2(10)
+ CLIENT_PROV                               NOT NULL CHAR(2)
+ CLIENT_POSTAL                             NOT NULL CHAR(6)
+
+CREATE TABLE prog(
+prog_id NUMBER(5) CONSTRAINT prog_id_pk PRIMARY KEY,
+prog_name VARCHAR2(2)CONSTRAINT nl_prog_name NOT NULL,
+prog_office CHAR(4) CONSTRAINT nl_prog_office NOT NULL,
+prog_phone CHAR(10) 
+);
+SQL> desc prog
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ PROG_ID                                   NOT NULL NUMBER(5)
+ PROG_NAME                                 NOT NULL VARCHAR2(2)
+ PROG_OFFICE                               NOT NULL CHAR(4)
+ PROG_PHONE                                         CHAR(10)
+
+CREATE TABLE project(
+project_id NUMBER(6) PRIMARY KEY,
+proj_name VARCHAR2(40) CONSTRAINT nl_proj_name NOT NULL UNIQUE,
+complete_date DATE,
+total_cost NUMBER(8,2) CONSTRAINT ch_total_cost CHECK (total_cost>0),
+client_id NUMBER(5) CONSTRAINT nl_client NOT NULL CONSTRAINT client_fk REFERENCES client(client_id)
+);
+SQL> desc project
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ PROJECT_ID                                NOT NULL NUMBER(6)
+ PROJ_NAME                                 NOT NULL VARCHAR2(40)
+ COMPLETE_DATE                                      DATE
+ TOTAL_COST                                         NUMBER(8,2)
+ CLIENT_ID                                 NOT NULL NUMBER(5)
+
+CREATE TABLE project_staff(	
+prog_id NUMBER(5),
+project_id NUMBER(6),
+week_year CHAR(5),
+hours_worked NUMBER(4,1) NOT NULL,
+CONSTRAINT ch_hours_worked CHECK (hours_worked>0),
+CONSTRAINT proj_proj_week_pk PRIMARY KEY(prog_id,project_id,week_year),
+CONSTRAINT projstaff_prog_fk Foreign Key (Prog_id)
+	REFERENCES prog (Prog_id),
+CONSTRAINT projstaff_proj_fk Foreign Key (Project_id)
+	REFERENCES project (Project_id)
+);
+SQL> desc project_staff
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ PROG_ID                                   NOT NULL NUMBER(5)
+ PROJECT_ID                                NOT NULL NUMBER(6)
+ WEEK_YEAR                                 NOT NULL CHAR(5)
+ HOURS_WORKED                              NOT NULL NUMBER(4,1)

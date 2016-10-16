@@ -1,0 +1,139 @@
+Assignment #1
+Philip Chung
+
+1.
+SELECT EMP_NO, ENAME || ', ' || FNAME "Full Name", JOB,TO_CHAR(HIREDATE,'fmMonth ') || TO_CHAR(ROUND(HIREDATE,'MONTH'),'(fmMonth) "First of "yyyy') "Start Date"
+FROM EMPLOYEE
+WHERE TO_CHAR(HIREDATE,'Mon') = 'Jan'	
+ORDER BY HIREDATE DESC
+ 
+    EMP_NO Full Name                                  JOB             Start Date
+---------- ------------------------------------------ --------------- -----------------------------------
+       106 Ramirez, Maria                             Developer       January (January) First of 1983
+       114 Miller, Scott                              Clerk           January (February) First of 1982
+
+2.
+SELECT 'Employee# ' || EMP_NO || ' named ' || ENAME || ' ' || FNAME || ' who is ' || JOB || ' will have a new salary of $' || TO_CHAR(ROUND(SAL * 1.25,-2),'FM$099,999') AS "Employees with higher salary."
+FROM EMPLOYEE
+WHERE SAL BETWEEN 3000 AND 5000 AND (JOB LIKE 'Developer%' OR JOB LIKE 'Manager%')
+ORDER BY EMP_NO
+/
+
+Employees with higher salary.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Employee# 101 named Cohen Michael who is Developer will have a new salary of $$004,000
+Employee# 107 named Clark Anna who is Manager will have a new salary of $$006,100
+Employee# 110 named Mohammed Ahmed who is Developer will have a new salary of $$003,800
+
+3.
+SELECT EMP_NO, ENAME || ', ' || FNAME AS "Full Name", SUBSTR(ENAME,-4) AS "Last", D.LOCN "Location"
+FROM EMPLOYEE E
+JOIN DEPARTMENT D
+ON E.DEPT_NO = D.DEPT_NO
+WHERE (ENAME LIKE '%e%' OR ENAME LIKE '%o%') 
+AND (ENAME LIKE 'M%' OR FNAME LIKE 'M%') 
+AND (LENGTH(ENAME) + LENGTH(FNAME) < 15)
+ORDER BY 2
+/
+
+
+    EMP_NO Full Name                                  Last Location
+---------- ------------------------------------------ ---- ---------------
+       101 Cohen, Michael                             ohen Toronto
+       114 Miller, Scott                              ller TORONTO
+       110 Mohammed, Ahmed                            mmed Toronto
+       106 Ramirez, Maria                             irez OTTAWA
+
+
+4.
+SELECT ENAME,FNAME, SAL,JOB, nvl(TO_CHAR(MGR),'NONE')"Manager#",TO_CHAR(SUM(SAL+3000)*12,'FM$999,999.0')"Total Pay"
+FROM EMPLOYEE
+WHERE (COMM IS NULL OR JOB LIKE 'Analyst%')
+GROUP BY ENAME,FNAME,JOB,MGR,SAL
+HAVING (SUM(SAL+3000)*12 > 120000)
+ORDER BY SUM(SAL+3000)*12 desc
+
+ENAME                FNAME                       SAL JOB             Manager#                                 Total Pay
+-------------------- -------------------- ---------- --------------- ---------------------------------------- -----------
+Ford                 James                     46000 Analyst         107                                      $588,000.0
+Scott                Peter                     45000 Analyst         107                                      $576,000.0
+King                 James                     10000 President       NONE                                     $156,000.0
+
+5.
+
+SELECT pname "Project Name" , 'Employee #' || e.EMP_NO || ' charged' || TO_CHAR(DOLLARS_CHARGED,'$9999.99') || ' on ' || TO_CHAR(time_log_date,'dth "of" fmMonth "in" yyyy ') "Project Charges"
+FROM project p
+JOIN project_hour h
+ON h.project_no = p.project_no
+JOIN employee e
+ON e.emp_no = h.emp_no
+WHERE (pname LIKE '%Warehouse%' OR pname LIKE '%Payroll%') AND (TO_CHAR(TIME_LOG_DATE,'MON') IN 'OCT')
+ORDER BY time_log_date desc,e.EMP_NO
+
+Project Name                   Project Charges
+------------------------------ ------------------------------------------------------------------------------------------------
+Data Warehouse Maintenance     Employee #113 charged $2100.00 on 7th of October in 1998
+Data Warehouse Maintenance     Employee #107 charged   $45.00 on 6th of October in 1998
+Data Warehouse Maintenance     Employee #101 charged  $169.00 on 5th of October in 1998
+Data Warehouse Maintenance     Employee #108 charged  $220.00 on 5th of October in 1998
+Data Warehouse Maintenance     Employee #111 charged  $100.00 on 5th of October in 1998
+
+
+6.
+SELECT pname "Project Name",sum(dollars_charged)"Total Charge",min(time_log_date)"Earliest Date",max(time_log_date)"Latest Date",max(time_log_date)-min(time_log_date)"Days Elapsed"
+FROM project p
+FULL OUTER JOIN project_hour h
+ON h.project_no = p.project_no
+GROUP BY pname
+HAVING (UPPER(pname) NOT LIKE '%WAREHOUSE%') AND  (max(time_log_date)-min(time_log_date) > 320)
+ORDER BY pname
+
+Project Name                   Total Charge Earliest  Latest Da Days Elapsed
+------------------------------ ------------ --------- --------- ------------
+Accounting Implementation             24189 01-JAN-98 15-DEC-98          348
+Network Improvements                  26563 01-JAN-98 15-DEC-98          348
+Web Site Development                  20063 01-JAN-98 15-DEC-98          348
+
+7.
+
+
+select pname
+from project
+where project_no IN (select project_no
+		     from project_hour
+		     where emp_no IN (select emp_no
+				      from employee
+				      where dept_no IN(select dept_no
+							from department
+							where UPPER(dept_name) = 'RESEARCH'
+							OR UPPER(dept_name) ='OPERATIONS'
+				                       ) 
+				     )
+		     )
+Order by pname
+
+PNAME
+------------------------------
+Accounting Implementation
+Data Warehouse Maintenance
+Inventory Enhancements
+Network Improvements
+Web Site Development
+
+8.
+SELECT FNAME || ' ' || ENAME,JOB,TO_CHAR(SAL,'$99999.99'),DEPT_NO
+FROM EMPLOYEE
+WHERE SAL < ALL      (SELECT AVG(SAL)
+		      FROM EMPLOYEE
+		      WHERE (JOB <> 'Analyst' AND JOB <> 'Manager' AND JOB <> 'President')
+		      )
+AND DEPT_NO IN(SELECT DEPT_NO
+	       FROM DEPARTMENT
+	       WHERE (DEPT_NAME = 'Research' OR DEPT_NAME = 'Operations')
+	       ) 
+ORDER BY FNAME	
+
+FNAME||''||ENAME                          JOB             TO_CHAR(SA    DEPT_NO
+----------------------------------------- --------------- ---------- ----------
+Joanne Smith                              Clerk              $812.06         20
+Maria Ramirez                             Developer         $2200.00         20
